@@ -157,7 +157,7 @@ public class Query {
     }
 
     private static float docMRRCalc(ScoreDoc[] hits, int count,IndexSearcher searcher ){
-        for(int i = 0; i< 10; i++){
+        for(int i = 0; i< 1; i++){
             try {
                 if(searcher.doc(hits[i].doc).get("title").equals(answers.get(count))){
                     return (float)1/(float)(i+1);
@@ -168,7 +168,5 @@ public class Query {
         }
         return 0;
     }
-
-
-
+    
 }

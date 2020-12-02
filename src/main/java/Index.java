@@ -100,7 +100,7 @@ public class Index {
                                 content += tok.lemma() + " ";
                             }
                             */
-                            content += LineCleaner(wLine);
+                            content += wLine;
                             if (inputScanner.hasNextLine()) {
                                 wLine = inputScanner.nextLine();
                                 line = wLine.split("\\s+");
