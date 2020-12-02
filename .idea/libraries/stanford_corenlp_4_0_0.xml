@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="stanford-corenlp-4.0.0">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/edu/stanford/nlp/stanford-corenlp/4.0.0/stanford-corenlp-4.0.0.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/edu/stanford/nlp/stanford-corenlp/4.0.0/stanford-corenlp-4.0.0-models.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+    <jarDirectory url="jar://$MAVEN_REPOSITORY$/edu/stanford/nlp/stanford-corenlp/4.0.0/stanford-corenlp-4.0.0-models.jar!/" recursive="false" />
+  </library>
+</component>

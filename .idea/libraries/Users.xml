@@ -1,0 +1,20 @@
+<component name="libraryTable">
+  <library name="Users">
+    <CLASSES>
+      <root url="file://C:/Users" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/lucene/lucene-analyzers-common/7.7.1/lucene-analyzers-common-7.7.1.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/lucene/lucene-core/7.7.1/lucene-core-7.7.1.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/lucene/lucene-queries/7.7.1/lucene-queries-7.7.1.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/lucene/lucene-queryparser/7.7.1/lucene-queryparser-7.7.1.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/lucene/lucene-sandbox/7.7.1/lucene-sandbox-7.7.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+    <jarDirectory url="file://C:/Users" recursive="false" />
+    <jarDirectory url="jar://$MAVEN_REPOSITORY$/org/apache/lucene/lucene-analyzers-common/7.7.1/lucene-analyzers-common-7.7.1.jar!/" recursive="false" />
+    <jarDirectory url="jar://$MAVEN_REPOSITORY$/org/apache/lucene/lucene-core/7.7.1/lucene-core-7.7.1.jar!/" recursive="false" />
+    <jarDirectory url="jar://$MAVEN_REPOSITORY$/org/apache/lucene/lucene-queries/7.7.1/lucene-queries-7.7.1.jar!/" recursive="false" />
+    <jarDirectory url="jar://$MAVEN_REPOSITORY$/org/apache/lucene/lucene-queryparser/7.7.1/lucene-queryparser-7.7.1.jar!/" recursive="false" />
+    <jarDirectory url="jar://$MAVEN_REPOSITORY$/org/apache/lucene/lucene-sandbox/7.7.1/lucene-sandbox-7.7.1.jar!/" recursive="false" />
+  </library>
+</component>
