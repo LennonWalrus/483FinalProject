@@ -7,6 +7,7 @@ import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.similarities.ClassicSimilarity;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 
@@ -56,8 +57,7 @@ public class Query {
         while(inputScanner.hasNext()){
             String query = "";
             String answer = "";
-            //query += inputScanner.nextLine() +" ";
-            inputScanner.nextLine();
+            query += inputScanner.nextLine() +" ";
             query += inputScanner.nextLine();
             answer+= inputScanner.nextLine().toLowerCase();
             inputScanner.nextLine();
@@ -135,6 +135,7 @@ public class Query {
                 reader = DirectoryReader.open(index);
                 //System.out.println(reader.numDocs());
                 searcher = new IndexSearcher(reader);
+                searcher.setSimilarity(new ClassicSimilarity());
                 docs = searcher.search(q, hitsPerPage);
                 ScoreDoc[] hits = docs.scoreDocs;
                 //System.out.println(hits.length);
@@ -157,7 +158,7 @@ public class Query {
     }
 
     private static float docMRRCalc(ScoreDoc[] hits, int count,IndexSearcher searcher ){
-        for(int i = 0; i< 10; i++){
+        for(int i = 0; i< 3; i++){
             try {
                 if(searcher.doc(hits[i].doc).get("title").equals(answers.get(count))){
                     return (float)1/(float)(i+1);

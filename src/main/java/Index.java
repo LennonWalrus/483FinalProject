@@ -9,6 +9,7 @@ import org.apache.lucene.index.*;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
+import org.apache.lucene.search.similarities.ClassicSimilarity;
 import org.apache.lucene.store.*;
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.pipeline.*;
@@ -41,6 +42,7 @@ public class Index {
         analyzer = new StandardAnalyzer();
         index = FSDirectory.open(Paths.get("src/main/resources/wiki.lucene"));
         IndexWriterConfig config = new IndexWriterConfig(analyzer);
+        config.setSimilarity(new ClassicSimilarity());
         IndexWriter w = null;
         boolean first = true;
         try {
