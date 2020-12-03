@@ -1,4 +1,5 @@
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.core.StopAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
@@ -105,6 +106,10 @@ public class Query {
             }
             if(token.equals(","))
                 continue;
+            if(StopAnalyzer.ENGLISH_STOP_WORDS_SET.contains(token.toLowerCase())) {
+                System.out.println(token.toLowerCase());
+                continue;
+            }
             ret += token.toLowerCase() + " ";
         }
         return ret.substring(0,ret.length()-1);
@@ -157,7 +162,7 @@ public class Query {
     }
 
     private static float docMRRCalc(ScoreDoc[] hits, int count,IndexSearcher searcher ){
-        for(int i = 0; i< 10; i++){
+        for(int i = 0; i< 5; i++){
             try {
                 if(searcher.doc(hits[i].doc).get("title").equals(answers.get(count))){
                     return (float)1/(float)(i+1);
