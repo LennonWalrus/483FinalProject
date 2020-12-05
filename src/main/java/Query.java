@@ -1,3 +1,4 @@
+import edu.stanford.nlp.simple.Sentence;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.DirectoryReader;
@@ -23,6 +24,7 @@ public class Query {
     private static FSDirectory index;
     private static Analyzer analyzer;
     static ArrayList<String> answers = new ArrayList<>();
+    static ArrayList<String> answers2 = new ArrayList<>();
     static ArrayList<String> foundAnswers = new ArrayList<>();
     //static ArrayList<Float> scores = new ArrayList<>();
 
@@ -62,7 +64,15 @@ public class Query {
             answer+= inputScanner.nextLine().toLowerCase();
             inputScanner.nextLine();
             queries.add(query);
-            answers.add(answer);
+            if(answer.contains("|")){
+                String[] found = answer.split("\\|");
+                answers.add(found[0]);
+                answers2.add(found[1]);
+            }
+            else{
+                answers.add(answer);
+                answers2.add("none");
+            }
             //System.out.println(query);
             //System.out.println(answer);
         }
@@ -72,7 +82,19 @@ public class Query {
     private static ArrayList<String> queryStem(ArrayList<String> old){
         ArrayList<String> stemed = new ArrayList<>();
         for(String pre: old){
-            stemed.add(LineCleaner(pre));
+            String clean = LineCleaner(pre);
+            //System.out.println(clean);
+            //System.out.println(clean.split("\\s+").length);
+            if(clean.length() != 0) {
+                Sentence sent1 = new Sentence(clean);
+                //System.out.println(sent1.tokens());
+                String lemmas = " ";
+                for (String lemm : sent1.lemmas()) {
+                    lemmas += lemm + " ";
+                }
+                //System.out.println(lemmas);
+                stemed.add(lemmas);
+            }
         }
         return stemed;
     }
@@ -138,10 +160,13 @@ public class Query {
                 docs = searcher.search(q, hitsPerPage);
                 ScoreDoc[] hits = docs.scoreDocs;
                 //System.out.println(hits.length);
-                System.out.println("found1 " +searcher.doc(hits[0].doc).get("title"));
-                System.out.println("found2 " +searcher.doc(hits[1].doc).get("title"));
-                System.out.println("found3 " +searcher.doc(hits[2].doc).get("title"));
-                System.out.println( "real " +answers.get(count));
+                System.out.println("found1: \"" +searcher.doc(hits[0].doc).get("title") +"\"");
+                System.out.println("found2: \"" +searcher.doc(hits[1].doc).get("title") +"\"");
+                System.out.println("found3: \"" +searcher.doc(hits[2].doc).get("title") +"\"");
+                System.out.println( "real: \"" +answers.get(count) +"\"");
+                if(!answers2.get(count).equals("none")){
+                    System.out.println( "real2: \"" +answers2.get(count) +"\"");
+                }
                 float score = docMRRCalc(hits,count,searcher);
                 overallScore += score;
                 System.out.println("MRR Score " +score);
@@ -157,9 +182,9 @@ public class Query {
     }
 
     private static float docMRRCalc(ScoreDoc[] hits, int count,IndexSearcher searcher ){
-        for(int i = 0; i< 10; i++){
+        for(int i = 0; i< 1; i++){
             try {
-                if(searcher.doc(hits[i].doc).get("title").equals(answers.get(count))){
+                if(searcher.doc(hits[i].doc).get("title").equals(answers.get(count))|| searcher.doc(hits[i].doc).get("title").equals(answers2.get(count))){
                     return (float)1/(float)(i+1);
                 }
             } catch (IOException e) {

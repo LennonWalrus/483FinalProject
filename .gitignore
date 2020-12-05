@@ -126,3 +126,13 @@ src/main/resources/wiki.lucene/_e.cfs
 src/main/resources/wiki.lucene/_e.si
 src/main/resources/wiki.lucene/_f.fdt
 src/main/resources/wiki.lucene/_f.fdx
+target/classes/wiki.lucene/_c.fdt
+target/classes/wiki.lucene/_c.fdx
+target/classes/wiki.lucene/_c.fnm
+target/classes/wiki.lucene/_c.nvd
+target/classes/wiki.lucene/_c.nvm
+target/classes/wiki.lucene/_c.si
+target/classes/wiki.lucene/_c_Lucene50_0.doc
+target/classes/wiki.lucene/_c_Lucene50_0.pos
+target/classes/wiki.lucene/_c_Lucene50_0.tim
+target/classes/wiki.lucene/_c_Lucene50_0.tip
