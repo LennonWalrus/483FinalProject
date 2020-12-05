@@ -1,4 +1,5 @@
 
+import edu.stanford.nlp.simple.Sentence;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -18,6 +19,7 @@ import javax.sound.sampled.Line;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Properties;
 import java.util.Scanner;
 
@@ -58,7 +60,7 @@ public class Index {
         StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
         File[] wikiList = folder.listFiles();
         for(File file: wikiList) {
-            //System.out.println(file.getName());
+            System.out.println(file.getName());
             try (
                     Scanner inputScanner = new Scanner(file)) {
                 String wLine = "";
@@ -93,14 +95,23 @@ public class Index {
                         wLine = inputScanner.nextLine();
                         line = wLine.split("\\s+");
                         while (!line[0].startsWith("[[")) {
-                            /*CoreDocument document = pipeline.processToCoreDocument(LineCleaner(wLine));
-                            for (CoreLabel tok : document.tokens()) {//loop through tokens of doc
-                                if (tok.lemma().equals("."))
-                                    continue;
-                                content += tok.lemma() + " ";
+                            if (wLine.length() != 0) {
+                                //System.out.println(wLine);
+                               // System.out.println(wLine.length());
+                                String clean = LineCleaner(wLine);
+                                //System.out.println(clean);
+                                //System.out.println(clean.split("\\s+").length);
+                                if(clean.length() != 0) {
+                                    Sentence sent1 = new Sentence(clean);
+                                    //System.out.println(sent1.tokens());
+                                    String lemmas = " ";
+                                    for (String lemm : sent1.lemmas()) {
+                                        lemmas += lemm + " ";
+                                    }
+                                    //System.out.println(lemmas);
+                                    content += lemmas;
+                                }
                             }
-                            */
-                            content += LineCleaner(wLine);
                             if (inputScanner.hasNextLine()) {
                                 wLine = inputScanner.nextLine();
                                 line = wLine.split("\\s+");
@@ -139,7 +150,7 @@ public class Index {
                                 break;
                             }
                         }
-                        //System.out.println("content : " +content);
+                        //System.out.println("content : " +content)
                         addDoc(w, title, content);
                     }
                     else {
@@ -199,14 +210,8 @@ public class Index {
                 }
                 continue;
             }
-            while (token.endsWith(",") || token.endsWith(")") || token.endsWith("?") || token.endsWith(".") || token.endsWith("!") || token.endsWith(";") || token.endsWith(":")|| token.endsWith("=") || token.endsWith("s")|| token.endsWith("\"")){
+            while (token.endsWith(",") || token.endsWith(")") || token.endsWith("?") || token.endsWith(".") || token.endsWith("!") || token.endsWith(";") || token.endsWith(":")|| token.endsWith("=") || token.endsWith("\"")){
                 token = token.substring(0, token.length()-1);
-            }
-            if(token.endsWith("ed")){
-                token = token.substring(0,token.length()-2);
-            }
-            while(token.contains("-")){
-                token = token.substring(0,token.indexOf("-")) + token.substring(token.indexOf("-")+1);
             }
             while(token.contains("(")){
                 token = token.substring(0,token.indexOf("(")) + token.substring(token.indexOf("(")+1);
@@ -214,8 +219,13 @@ public class Index {
             while(token.contains("\"")){
                 token = token.substring(0,token.indexOf("\"")) + token.substring(token.indexOf("\"")+1);
             }
-            if(token.equals(","))
+            token = token.replace("\u00a0","");
+            token = token.replace(" ","");
+            if(token.equals(",") || token.equals(".") || token.equals("") || token.equals(" ") )
                 continue;
+           // System.out.println(token.length());
+            //System.out.println("\""+token + "\"");
+
             ret += token.toLowerCase() + " ";
         }
         return ret.substring(0,ret.length()-1);
@@ -235,6 +245,7 @@ public class Index {
             }
             if(token.equals(","))
                 continue;
+
             ret += token.toLowerCase() + " ";
         }
         return ret.substring(0,ret.length()-1);
