@@ -1,4 +1,5 @@
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.core.StopAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
@@ -56,8 +57,8 @@ public class Query {
         while(inputScanner.hasNext()){
             String query = "";
             String answer = "";
-            //query += inputScanner.nextLine() +" ";
-            inputScanner.nextLine();
+            query += inputScanner.nextLine() +" ";
+            //inputScanner.nextLine();
             query += inputScanner.nextLine();
             answer+= inputScanner.nextLine().toLowerCase();
             inputScanner.nextLine();
@@ -102,6 +103,10 @@ public class Query {
             }
             if(token.equals(","))
                 continue;
+            if(StopAnalyzer.ENGLISH_STOP_WORDS_SET.contains(token.toLowerCase())) {
+               //System.out.println(token.toLowerCase());
+                continue;
+            }
             ret += token.toLowerCase() + " ";
         }
         return ret.substring(0,ret.length()-1);
