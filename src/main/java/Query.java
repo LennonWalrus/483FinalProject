@@ -90,11 +90,8 @@ public class Query {
             while(token.startsWith("(") || token.startsWith("=") || token.startsWith("\"")){
                 token = token.substring(1,token.length());
             }
-            while (token.endsWith(",") || token.endsWith(")") || token.endsWith("?") || token.endsWith(".") || token.endsWith("!") || token.endsWith(";") || token.endsWith(":")||  token.endsWith("=") || token.endsWith("\"" )|| token.endsWith("'") || token.endsWith("s")){
+            while (token.endsWith(",") || token.endsWith(")") || token.endsWith("?") || token.endsWith(".") || token.endsWith("!") || token.endsWith(";") || token.endsWith(":")||  token.endsWith("=") || token.endsWith("\"" )|| token.endsWith("'")){
                 token = token.substring(0, token.length()-1);
-            }
-            if(token.endsWith("ed")){
-                token = token.substring(0,token.length()-2);
             }
             while(token.contains("-")){
                 token = token.substring(0,token.indexOf("-")) + token.substring(token.indexOf("-")+1);
@@ -108,9 +105,11 @@ public class Query {
             if(token.equals(","))
                 continue;
             //stop word filter
+            /*
             if(StopAnalyzer.ENGLISH_STOP_WORDS_SET.contains(token.toLowerCase())){
                 continue;
             }
+             */
             ret += token.toLowerCase() + " ";
         }
         return ret.substring(0,ret.length()-1);
@@ -164,7 +163,7 @@ public class Query {
     }
 
     private static float docMRRCalc(ScoreDoc[] hits, int count,IndexSearcher searcher ){
-        for(int i = 0; i< 5; i++){
+        for(int i = 0; i< 1; i++){
             try {
                 if(searcher.doc(hits[i].doc).get("title").equals(answers.get(count))){
                     return (float)1/(float)(i+1);

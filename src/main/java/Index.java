@@ -102,7 +102,7 @@ public class Index {
                                 content += tok.lemma() + " ";
                             }
                             */
-                            content += LineCleaner(wLine);
+                            content += wLine;
                             if (inputScanner.hasNextLine()) {
                                 wLine = inputScanner.nextLine();
                                 line = wLine.split("\\s+");
@@ -187,19 +187,8 @@ public class Index {
             }
             if(s.equals("CATEGORIES:"))
                 continue;
-            if(link){
-                if(s.endsWith("[/tpl]"))
-                    link = false;
-                continue;
-            }
             while(token.startsWith("(") || token.startsWith("=") || token.startsWith("\"")){
                 token = token.substring(1,token.length());
-            }
-            if(token.startsWith("[tpl]")){
-                if(s.length() > 5){
-                    link = true;
-                }
-                continue;
             }
             while (token.endsWith(",") || token.endsWith(")") || token.endsWith("?") || token.endsWith(".") || token.endsWith("!") || token.endsWith(";") || token.endsWith(":")|| token.endsWith("=") || token.endsWith("s")|| token.endsWith("\"")){
                 token = token.substring(0, token.length()-1);
