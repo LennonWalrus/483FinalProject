@@ -1,5 +1,6 @@
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.core.StopAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -205,6 +206,9 @@ public class Index {
             if(token.endsWith("ed")){
                 token = token.substring(0,token.length()-2);
             }
+            if(token.endsWith("ing")){
+                token = token.substring(0,token.length()-3);
+            }
             while(token.contains("-")){
                 token = token.substring(0,token.indexOf("-")) + token.substring(token.indexOf("-")+1);
             }
@@ -216,6 +220,12 @@ public class Index {
             }
             if(token.equals(","))
                 continue;
+            /*
+            if(StopAnalyzer.ENGLISH_STOP_WORDS_SET.contains(token.toLowerCase())) {
+                //System.out.println(token.toLowerCase());
+                continue;
+            }
+             */
             ret += token.toLowerCase() + " ";
         }
         return ret.substring(0,ret.length()-1);
