@@ -111,11 +111,8 @@ public class Query {
             while(token.startsWith("(") || token.startsWith("=") || token.startsWith("\"")){
                 token = token.substring(1,token.length());
             }
-            while (token.endsWith(",") || token.endsWith(")") || token.endsWith("?") || token.endsWith(".") || token.endsWith("!") || token.endsWith(";") || token.endsWith(":")||  token.endsWith("=") || token.endsWith("\"" )|| token.endsWith("'") || token.endsWith("s")){
+            while (token.endsWith(",") || token.endsWith(")") || token.endsWith("?") || token.endsWith(".") || token.endsWith("!") || token.endsWith(";") || token.endsWith(":")||  token.endsWith("=") || token.endsWith("\"" )|| token.endsWith("'") ){
                 token = token.substring(0, token.length()-1);
-            }
-            if(token.endsWith("ed")){
-                token = token.substring(0,token.length()-2);
             }
             while(token.contains("-")){
                 token = token.substring(0,token.indexOf("-")) + token.substring(token.indexOf("-")+1);
@@ -128,9 +125,12 @@ public class Query {
             }
             if(token.equals(","))
                 continue;
+
             if(StopAnalyzer.ENGLISH_STOP_WORDS_SET.contains(token.toLowerCase())) {
                 continue;
             }
+
+
             ret += token.toLowerCase() + " ";
         }
         return ret.substring(0,ret.length()-1);
@@ -142,6 +142,7 @@ public class Query {
         for(String quest: queries) {
             count++;
             String qstr = "content:";
+            System.out.println(quest);
             String[] tokens = quest.split("[!.,?;\\s]+");
             for(String token: tokens){
                 if(token.equals(""))
@@ -164,9 +165,9 @@ public class Query {
                 docs = searcher.search(q, hitsPerPage);
                 ScoreDoc[] hits = docs.scoreDocs;
                 //System.out.println(hits.length);
-                System.out.println("found1: \"" +searcher.doc(hits[0].doc).get("title") +"\"");
-                System.out.println("found2: \"" +searcher.doc(hits[1].doc).get("title") +"\"");
-                System.out.println("found3: \"" +searcher.doc(hits[2].doc).get("title") +"\"");
+                System.out.println("found top: \"" +searcher.doc(hits[0].doc).get("title") +"\"");
+                System.out.println("found 2: \"" +searcher.doc(hits[1].doc).get("title") +"\"");
+                System.out.println("found 3: \"" +searcher.doc(hits[2].doc).get("title") +"\"");
                 System.out.println( "real: \"" +answers.get(count) +"\"");
                 if(!answers2.get(count).equals("none")){
                     System.out.println( "real2: \"" +answers2.get(count) +"\"");
