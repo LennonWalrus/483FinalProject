@@ -9,7 +9,6 @@ import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
-import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 
 import java.io.File;
@@ -18,7 +17,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 public class Query {
@@ -27,14 +25,22 @@ public class Query {
     static ArrayList<String> answers = new ArrayList<>();
     static ArrayList<String> answers2 = new ArrayList<>();
     static ArrayList<String> foundAnswers = new ArrayList<>();
-    //static ArrayList<Float> scores = new ArrayList<>();
+    static int topD = 1;
 
     public static void main(String[] args) {
+        if(args.length == 0 || (args.length == 1 && isNumeric(args[0]))){
+            if(args.length != 0){
+                topD = Integer.parseInt(args[0]);
+            }
+        }
+        else {
+            System.out.println("Please enter no arguments for top document or a number x as a argument documents for top x documents");
+            System.exit(1);
+        }
        grabIndex();
        ArrayList<String> queries = genQueries(Paths.get("src/main/resources/questions.txt"));
-       queries = queryStem(queries);
+       queries = queryLemm(queries);
        luceneAnswers(queries);
-
 
     }
 
@@ -80,7 +86,7 @@ public class Query {
         return queries;
     }
 
-    private static ArrayList<String> queryStem(ArrayList<String> old){
+    private static ArrayList<String> queryLemm(ArrayList<String> old){
         ArrayList<String> stemed = new ArrayList<>();
         for(String pre: old){
             String clean = LineCleaner(pre);
@@ -156,7 +162,7 @@ public class Query {
             IndexReader reader = null;
             IndexSearcher searcher = null;
             TopDocs docs = null;
-            int hitsPerPage = 10;
+            int hitsPerPage = topD;
             try {
                 q = new QueryParser("content", analyzer).parse(qstr);
                 reader = DirectoryReader.open(index);
@@ -165,9 +171,9 @@ public class Query {
                 docs = searcher.search(q, hitsPerPage);
                 ScoreDoc[] hits = docs.scoreDocs;
                 //System.out.println(hits.length);
-                System.out.println("found top: \"" +searcher.doc(hits[0].doc).get("title") +"\"");
-                System.out.println("found 2: \"" +searcher.doc(hits[1].doc).get("title") +"\"");
-                System.out.println("found 3: \"" +searcher.doc(hits[2].doc).get("title") +"\"");
+                for(int i = 0; i< topD; i++ ){
+                    System.out.println("result " + (i+1) + ": \"" +searcher.doc(hits[i].doc).get("title") +"\"" );
+                }
                 System.out.println( "real: \"" +answers.get(count) +"\"");
                 if(!answers2.get(count).equals("none")){
                     System.out.println( "real2: \"" +answers2.get(count) +"\"");
@@ -187,7 +193,7 @@ public class Query {
     }
 
     private static float docMRRCalc(ScoreDoc[] hits, int count,IndexSearcher searcher ){
-        for(int i = 0; i< 10; i++){
+        for(int i = 0; i< topD; i++){
             try {
                 if(searcher.doc(hits[i].doc).get("title").equals(answers.get(count))|| searcher.doc(hits[i].doc).get("title").equals(answers2.get(count))){
                     return (float)1/(float)(i+1);
@@ -199,6 +205,14 @@ public class Query {
         return 0;
     }
 
+    public static boolean isNumeric(String str) {
+        try {
+            Double.parseDouble(str);
+            return true;
+        } catch(NumberFormatException e){
+            return false;
+        }
+    }
 
 
 }
