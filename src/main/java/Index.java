@@ -1,48 +1,44 @@
-
-import org.apache.lucene.analysis.Analyzer;
+import edu.stanford.nlp.simple.Sentence;
+import org.apache.lucene.analysis.core.StopAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
-import org.apache.lucene.index.*;
-import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.queryparser.classic.QueryParser;
-import org.apache.lucene.search.*;
-import org.apache.lucene.store.*;
-import edu.stanford.nlp.ling.*;
-import edu.stanford.nlp.pipeline.*;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
 
-import javax.print.attribute.standard.DocumentName;
-import javax.sound.sampled.Line;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.Properties;
 import java.util.Scanner;
-
+//program to index wiki pages placed in text files
 public class Index {
-    boolean indexExists=false;
-    String inputFilePath ="";
-    Directory index;
+    boolean indexExists=false;// if index already exists
+    String inputFilePath ="";//location of wiki pages
+    Directory index;//index
     StandardAnalyzer analyzer;
 
     public Index(String inputFile) throws Exception{
-        inputFilePath =inputFile;
-        buildIndex();
+        inputFilePath =inputFile;//set the location of the wiki pages
+        buildIndex();//to build the index
     }
 
 
     public static void main(String[] args) throws Exception {
-        Index holder = new Index("src/main/Resources/WikiPages");
+        Index holder = new Index("src/main/Resources/WikiPages");//set location of wiki pages to resources
     }
 
+    //method to build the lucene index does so by looping though wiki text files and designating and filling wiki pages without stemming
     private void buildIndex() throws IOException {
         analyzer = new StandardAnalyzer();
         index = FSDirectory.open(Paths.get("src/main/resources/wiki.lucene"));
-        IndexWriterConfig config = new IndexWriterConfig(analyzer);
+        IndexWriterConfig config = new IndexWriterConfig(analyzer);//set config with analyzer
         IndexWriter w = null;
-        boolean first = true;
+        boolean first = true;//set for first line of each document
         try {
             w = new IndexWriter(index, config);
         } catch (
@@ -50,62 +46,52 @@ public class Index {
             System.out.println("ERROR: creating indexWriter");
         }
         File folder = new File(inputFilePath);
-        // set up pipeline properties
-        Properties props = new Properties();
-        // set the list of annotators to run
-        props.setProperty("annotators", "tokenize,ssplit,pos,lemma");
-        // build pipeline
-        StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-        File[] wikiList = folder.listFiles();
-        for(File file: wikiList) {
-            //System.out.println(file.getName());
+        File[] wikiList = folder.listFiles();//grab list of text files from directory
+        for(File file: wikiList) {//loop through each file
+            System.out.println(file.getName());//print file name for progress
             try (
-                    Scanner inputScanner = new Scanner(file)) {
-                String wLine = "";
-                String[] line = null;
-                while (inputScanner.hasNextLine()) {
-                    if (first) {
+                    Scanner inputScanner = new Scanner(file)) {//set up scanner for current text file
+                String wLine = "";// for next line
+                String[] line = null;//for split of next line
+                while (inputScanner.hasNextLine()) {//while there is still more to the file
+                    if (first) {//set wLine and line for intial line of each document
                         wLine = inputScanner.nextLine();
                         line = wLine.split("\\s+");
                         first = false;
                     }
+                    //check if line is a title and not a file or image
                     if (line[0].startsWith("[[") && !line[0].startsWith("[[File:") && !line[0].startsWith("[[file:") && !line[0].startsWith("[[Image:") && !line[0].startsWith("[[image:")) {
-                        boolean titleDone = false;
+                        boolean titleDone = false;// boolean to loop through longer titles
                         int tCount = 2;
-                        String[] cleanT = LineCleanerT(wLine).split("\\s+");
-                        String title = cleanT[1].substring(2).toLowerCase();
-                        while (!titleDone) {
-                            if (title.endsWith("]]")) {
-                                titleDone = true;
-                                title = title.substring(0, title.length() - 2);
-                                if(title.endsWith(")")){
+                        String[] cleanT = LineCleanerT(wLine).split("\\s+");//user LineCleanerT to clean the doc title and split up again
+                        String title = cleanT[1].substring(2).toLowerCase();//grab title without intial brackets
+                        while (!titleDone) {//loop through title tokens
+                            if (title.endsWith("]]")) {//if end found
+                                titleDone = true;//set boolean
+                                title = title.substring(0, title.length() - 2);//cut off ending brackets
+                                if(title.endsWith(")")){//take off ending )
                                     while(title.endsWith(")")){
                                         title = title.substring(0,title.length()-1);
                                     }
                                 }
-                            } else {
+                            } else {// add token to token title
                                 title += " " + cleanT[tCount].toLowerCase();
                                 tCount++;
                             }
                         }
-                        String content = "";
+                        String content = "";// to save content of page
                         //System.out.println("Title: "+title);
-                        wLine = inputScanner.nextLine();
-                        line = wLine.split("\\s+");
-                        while (!line[0].startsWith("[[")) {
-                            /*CoreDocument document = pipeline.processToCoreDocument(LineCleaner(wLine));
-                            for (CoreLabel tok : document.tokens()) {//loop through tokens of doc
-                                if (tok.lemma().equals("."))
-                                    continue;
-                                content += tok.lemma() + " ";
+                        wLine = inputScanner.nextLine();//set input to next line
+                        line = wLine.split("\\s+");//split again
+                        while (!line[0].startsWith("[[")) {//while in content
+                            if (wLine.length() != 0) {//as long as line is not empty
+                                content += wLine;
                             }
-                            */
-                            content += wLine;
-                            if (inputScanner.hasNextLine()) {
+                            if (inputScanner.hasNextLine()) {//after content check again if thers next line if so set next line
                                 wLine = inputScanner.nextLine();
                                 line = wLine.split("\\s+");
-                                if (line.length == 0) {
-                                    while (line.length == 0) {
+                                if (line.length == 0) {//check if line empty again
+                                    while (line.length == 0) {//loop until not empty
                                         if (inputScanner.hasNextLine()) {
                                             wLine = inputScanner.nextLine();
                                             line = wLine.split("\\s+");
@@ -114,12 +100,14 @@ public class Index {
                                         }
                                     }
                                 }
+                                //check for file or image
                                 if (line[0].startsWith("[[File:") || line[0].startsWith("[[file:")|| line[0].startsWith("[[Image:") || line[0].startsWith("[[image:")) {
+                                    //while line is a file or image we skip it
                                     while (line[0].startsWith("[[File:") ||line[0].startsWith("[[file:")|| line[0].startsWith("[[Image:") || line[0].startsWith("[[image:")) {
-                                        if (inputScanner.hasNextLine()) {
+                                        if (inputScanner.hasNextLine()) {//if next line then set
                                             wLine = inputScanner.nextLine();
                                             line = wLine.split("\\s+");
-                                            if (line.length == 0) {
+                                            if (line.length == 0) {//if empty loop until not empty
                                                 while (line.length == 0) {
                                                     if (inputScanner.hasNextLine()) {
                                                         wLine = inputScanner.nextLine();
@@ -130,19 +118,19 @@ public class Index {
                                                 }
                                             }
                                         }
-                                        else {
+                                        else {//if no next line after file or image check stop for page
                                             break;
                                         }
                                     }
                                 }
-                            } else {
+                            } else {// if no line after last content check then stop for page
                                 break;
                             }
                         }
-                        //System.out.println("content : " +content);
-                        addDoc(w, title, content);
+                        //System.out.println("content : " +content)
+                        addDoc(w, title, content);//add the wiki page to the lucene index
                     }
-                    else {
+                    else {//if title not found loop until a title is found
                         while (!line[0].startsWith("[[")) {
                             if (inputScanner.hasNextLine()) {
                                 wLine = inputScanner.nextLine();
@@ -151,7 +139,7 @@ public class Index {
                                 break;
                             }
                         }
-                   }
+                    }
 
                 }
                 inputScanner.close();
@@ -161,8 +149,8 @@ public class Index {
             System.out.println("doc done");
             first = true;
         }
-        w.close();
-        indexExists = true;
+        w.close();//close index writer
+        indexExists = true;//index now exists
         System.out.println("got here");
         IndexReader reader = DirectoryReader.open(index);
         System.out.println("index max " +reader.maxDoc());
@@ -174,78 +162,36 @@ public class Index {
         */
     }
 
-    private String LineCleaner(String line){
-        String ret = " ";
-        String[] tokens = line.split("[!.,?;\\s]+");
-        boolean link = false;
-        for(String s : tokens){
-            String token = s;
-            if(s.equals("#redirect") || s.equals("#REDIRECT") ){
-                continue;
-            }
-            if(s.equals("CATEGORIES:"))
-                continue;
-            if(link){
-                if(s.endsWith("[/tpl]"))
-                    link = false;
-                continue;
-            }
-            while(token.startsWith("(") || token.startsWith("=") || token.startsWith("\"")){
-                token = token.substring(1,token.length());
-            }
-            if(token.startsWith("[tpl]")){
-                if(s.length() > 5){
-                    link = true;
-                }
-                continue;
-            }
-            while (token.endsWith(",") || token.endsWith(")") || token.endsWith("?") || token.endsWith(".") || token.endsWith("!") || token.endsWith(";") || token.endsWith(":")|| token.endsWith("=") || token.endsWith("s")|| token.endsWith("\"")){
-                token = token.substring(0, token.length()-1);
-            }
-            if(token.endsWith("ed")){
-                token = token.substring(0,token.length()-2);
-            }
-            while(token.contains("-")){
-                token = token.substring(0,token.indexOf("-")) + token.substring(token.indexOf("-")+1);
-            }
-            while(token.contains("(")){
-                token = token.substring(0,token.indexOf("(")) + token.substring(token.indexOf("(")+1);
-            }
-            while(token.contains("\"")){
-                token = token.substring(0,token.indexOf("\"")) + token.substring(token.indexOf("\"")+1);
-            }
-            if(token.equals(","))
-                continue;
-            ret += token.toLowerCase() + " ";
-        }
-        return ret.substring(0,ret.length()-1);
-    }
 
 
+    //shorter version of LineCleaner for cleaning titles
     private String LineCleanerT(String line){
-        String ret = " ";
-        String[] tokens = line.split("[!.,?;\\s]+");
-        for(String s : tokens){
+        String ret = " ";// to return
+        String[] tokens = line.split("[!.,?;\\s]+");// split title
+        for(String s : tokens){//loop through tokens
             String token = s;
-            while(token.startsWith("(") || token.startsWith("=") || token.startsWith("\"")){
+            while(token.startsWith("(") || token.startsWith("=") || token.startsWith("\"")){//remove these punctuations from the start of the token
                 token = token.substring(1,token.length());
             }
+            //while these tokens are present in the title remove them
             while (token.endsWith(",") || token.endsWith(")") || token.endsWith("?") || token.endsWith(".") || token.endsWith("!") || token.endsWith(";") || token.endsWith(":")|| token.endsWith("=") || token.endsWith("\"")){
                 token = token.substring(0, token.length()-1);
             }
+            //if token is , skip
             if(token.equals(","))
                 continue;
-            ret += token.toLowerCase() + " ";
+
+            ret += token.toLowerCase() + " ";// add token with a space to return string
         }
-        return ret.substring(0,ret.length()-1);
+        return ret.substring(0,ret.length()-1);//return without final space
     }
 
-
+    //method to create and add title and content to a lucene document and then add the doc to the index
     private static void addDoc(IndexWriter w, String title, String info) throws IOException{
-        Document doc = new Document();
-        doc.add(new TextField("title", title, Field.Store.YES));
-        doc.add(new TextField("content",info,Field.Store.YES));
-        w.addDocument(doc);
+        Document doc = new Document();//create a new lucene doc
+        doc.add(new TextField("title", title, Field.Store.YES));//set title
+        doc.add(new TextField("content",info,Field.Store.YES));//set content
+        w.addDocument(doc);//add doc to index.
     }
 
 
