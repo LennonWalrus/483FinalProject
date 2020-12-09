@@ -162,7 +162,7 @@ public class Query {
             IndexReader reader = null;
             IndexSearcher searcher = null;
             TopDocs docs = null;
-            int hitsPerPage = 10;//make hits per page match topD
+            int hitsPerPage = topD;//make hits per page match topD
             try {
                 q = new QueryParser("content", analyzer).parse(qstr);// generate query using query parser and our or string
                 reader = DirectoryReader.open(index);//create reader on found lucene index
@@ -192,7 +192,7 @@ public class Query {
 
     //method used to calculate MRR for a given question given the top hits
     private static float docMRRCalc(ScoreDoc[] hits, int count,IndexSearcher searcher ){
-        for(int i = 0; i< 10; i++){//loop thorugh topD documents
+        for(int i = 0; i< topD; i++){//loop thorugh topD documents
             try {
                 //if found
                 if(searcher.doc(hits[i].doc).get("title").equals(answers.get(count))){
